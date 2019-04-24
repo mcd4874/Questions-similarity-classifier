@@ -18,6 +18,8 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import roc_auc_score
 import seaborn as sns
 import matplotlib.pyplot as plt
+import pickle
+
 # get_ipython().run_line_magic('matplotlib', 'inline')
 
 
@@ -30,7 +32,19 @@ df.groupby("is_duplicate")['id'].count().plot.bar()
 
 
 # In[ ]:
-
+def generate_model(model,savePath):
+#     x_input,x_valid,y_input,y_valid = train_test_split(x_input, y_input, test_size=0.2, random_state=4242)
+#     model.fit(x_input,y_input)
+#     get_report(x_valid,y_valid,model)
+#     predict = model.predict(x_valid)
+#     print(classification_report(y_test, y_valid))
+    with open(savePath, 'wb') as file:
+        pickle.dump(model, file, -1)
+    return model
+def load_model(loadPath):
+    with open(loadPath, 'rb') as file:
+        model = pickle.load(file)
+    return model
 
 
 
@@ -195,6 +209,9 @@ y = labels
 X_train,X_test,y_train,y_test = train_test_split(X,y, test_size = 0.15, random_state = 0)
 X_train,X_valid,y_train,y_valid = train_test_split(X_train,y_train, test_size = 0.20, random_state = 4242)
 xgb_model = xgb.XGBClassifier(max_depth=50, n_estimators=80, learning_rate=0.1, colsample_bytree=.7, gamma=0, reg_alpha=4, objective='binary:logistic', eta=0.3, silent=1, subsample=0.8).fit(X_train, y_train) 
+generate_model(xgb_model,"gbx_BOW.pkl")
+xgb_model = load_model("gbx_BOW.pkl")
+
 xgb_prediction = xgb_model.predict(X_test)
 
 
