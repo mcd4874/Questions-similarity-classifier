@@ -183,3 +183,14 @@ def generate_report(model,X_valid,y_valid):
     xgb_prediction = model.predict(X_valid)
     print('validation F1 -  test:', f1_score(y_valid, model.predict(X_valid), average='macro'))
     print(classification_report(y_valid, xgb_prediction))
+
+# def build_model(df,df_valid,count_vect,xgb_model,):
+#     X_train, y_train = generate_input(count_vect, df)
+#     X_valid, y_valid = generate_input(count_vect, df_valid)
+#     # xgb_model = xgb.XGBClassifier(max_depth=50, n_estimators=80, learning_rate=0.1, colsample_bytree=.7, gamma=0, reg_alpha=4, objective='binary:logistic', eta=0.3, silent=1, subsample=0.8).fit(X_train, y_train)
+#     # xgb_model = RandomForestClassifier()
+#     xgb_model
+#     generate_model(xgb_model, "gbx_BOW.pkl")
+#     xgb_model = load_model("gbx_BOW.pkl")
+#     print("valid report ")
+#     generate_report(xgb_model, X_valid, y_valid)
