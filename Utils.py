@@ -1,28 +1,34 @@
-#!/usr/bin/env python
-# coding: utf-8
 
-# In[2]:
 
 
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
-import os
-import gc
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split
-# get_ipython().run_line_magic('matplotlib', 'inline')
-
-
-# In[10]:
 
 
 
-df = pd.read_csv('./input/questions.csv').dropna()
-df_train,df_test = train_test_split(df,test_size=0.15, random_state=0)
 
 
-# In[11]:
+
+df_train = pd.read_csv('./input/train_questions.csv').dropna()
+# df_train,df_test = train_test_split(df,test_size=0.15, random_state=0)
+
+
+a = 0
+for i in range(a,a+10):
+    if(df.is_duplicate[i] == 1):
+        print("dup uestions")
+        print(df.question1[i])
+        print(df.question2[i])
+    else:
+        print("not dup uestions")
+        print(df.question1[i])
+        print(df.question2[i])
+    print()
+
 
 
 print('Total number of question pairs for training: {}'.format(len(df_train)))
@@ -38,10 +44,11 @@ plt.yscale('log', nonposy='clip')
 plt.title('Log-Histogram of question appearance counts')
 plt.xlabel('Number of occurences of question')
 plt.ylabel('Number of questions')
+plt.savefig('./graph/questions-appearance.jpg')
+plt.show()
 print()
 
 
-# In[12]:
 
 
 pal = sns.color_palette()
@@ -57,7 +64,8 @@ plt.title('Normalised histogram of character count in questions', fontsize=15)
 plt.legend()
 plt.xlabel('Number of characters', fontsize=15)
 plt.ylabel('Probability', fontsize=15)
-
+plt.savefig('./graph/character-count.jpg')
+plt.show()
 print('mean-train {:.2f} std-train {:.2f} mean-test {:.2f} std-test {:.2f} max-train {:.2f} max-test {:.2f}'.format(dist_train.mean(), 
                           dist_train.std(), dist_test.mean(), dist_test.std(), dist_train.max(), dist_test.max()))
 
@@ -93,7 +101,8 @@ plt.hist(train_word_match[df_train['is_duplicate'] == 1], bins=20, normed=True, 
 plt.legend()
 plt.title('Label distribution over word_match_share', fontsize=15)
 plt.xlabel('word_match_share', fontsize=15)
-
+plt.savefig('./graph/label-distribution-word-match-share.jpg')
+plt.show()
 
 # In[14]:
 
@@ -144,20 +153,17 @@ plt.title('Label distribution over tfidf_word_match_share', fontsize=15)
 plt.xlabel('word_match_share', fontsize=15)
 
 
-# In[16]:
 
 
 x_train = pd.DataFrame()
-x_test = pd.DataFrame()
+# x_test = pd.DataFrame()
 x_train['word_match'] = train_word_match
 x_train['tfidf_word_match'] = tfidf_train_word_match
-x_test['word_match'] = df_test.apply(word_match_share, axis=1, raw=True)
-x_test['tfidf_word_match'] = df_test.apply(tfidf_word_match_share, axis=1, raw=True)
+# x_test['word_match'] = df_test.apply(word_match_share, axis=1, raw=True)
+# x_test['tfidf_word_match'] = df_test.apply(tfidf_word_match_share, axis=1, raw=True)
 
 y_train = df_train['is_duplicate'].values
-y_test = df_test['is_duplicate'].values
-
-# In[17]:
+# y_test = df_test['is_duplicate'].values
 
 
 x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2, random_state=4242)
@@ -167,55 +173,24 @@ x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_siz
 
 
 import xgboost as xgb
-
-# Set our parameters for xgboost
-params = {}
-params['objective'] = 'binary:logistic'
-params['eval_metric'] = 'logloss'
-params['eta'] = 0.02
-params['max_depth'] = 4
-print(y_train)
-print(y_valid)
-print(y_test)
-d_train = xgb.DMatrix(x_train, label=y_train)
-d_valid = xgb.DMatrix(x_valid, label=y_valid)
-
-watchlist = [(d_train, 'train'), (d_valid, 'valid')]
-
-bst = xgb.train(params, d_train, 400, watchlist, early_stopping_rounds=50, verbose_eval=10)
-#
-#
-# # In[ ]:
-#
-#
-d_test = xgb.DMatrix(x_test)
-p_test = bst.predict(d_test)
-# print(np.unique(p_test))
-p_test[p_test > 0.5] = 1
-p_test[p_test <= 0.5] = 0
-
-# In[ ]:
-
-from sklearn.metrics import classification_report, confusion_matrix,log_loss, accuracy_score
-
-
-print(classification_report(y_test, p_test))
-
-
-# In[ ]:
+from sklearn.ensemble import RandomForestClassifier
+from helper import generate_train_test_csv,load_data,generate_model,load_model,clean_data,generate_input,generate_BOW,generate_word_TI_DF,generate_n_gram_TF_IDF,generate_character_ngram_TF_IDF,generate_report
+xgb_model = xgb.XGBClassifier(max_depth=50, n_estimators=80, learning_rate=0.1, colsample_bytree=.7, gamma=0, reg_alpha=4, objective='binary:logistic', eta=0.3, silent=1, subsample=0.8).fit(x_train, y_train)
+generate_model(xgb_model,"./model/gbx_wordMatch.pkl")
+xgb_model = load_model("./model/gbx_wordMatch.pkl")
+print("valid report ")
+generate_report(xgb_model,x_valid,y_valid)
+print("finish first 1")
 
 
 
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
+rf_model = RandomForestClassifier()
+rf_model.fit(x_train,y_train)
+# rf_model
+generate_model(rf_model,"./model/rf_wordMatch.pkl")
+rf_model = load_model("./model/rf_wordMatch.pkl")
+print("valid report ")
+generate_report(rf_model,x_valid,y_valid)
+print("finish first 1")
 
 
