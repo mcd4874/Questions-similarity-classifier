@@ -17,66 +17,66 @@ df_train = pd.read_csv('./input/train_questions.csv').dropna()
 # df_train,df_test = train_test_split(df,test_size=0.15, random_state=0)
 
 
-a = 0
-for i in range(a,a+10):
-    if(df.is_duplicate[i] == 1):
-        print("dup uestions")
-        print(df.question1[i])
-        print(df.question2[i])
-    else:
-        print("not dup uestions")
-        print(df.question1[i])
-        print(df.question2[i])
-    print()
+# a = 0
+# for i in range(a,a+10):
+#     if(df.is_duplicate[i] == 1):
+#         print("dup uestions")
+#         print(df.question1[i])
+#         print(df.question2[i])
+#     else:
+#         print("not dup uestions")
+#         print(df.question1[i])
+#         print(df.question2[i])
+#     print()
 
 
 
-print('Total number of question pairs for training: {}'.format(len(df_train)))
-print('Duplicate pairs: {}%'.format(round(df_train['is_duplicate'].mean()*100, 2)))
-qids = pd.Series(df_train['qid1'].tolist() + df_train['qid2'].tolist())
-print('Total number of questions in the training data: {}'.format(len(
-    np.unique(qids))))
-print('Number of questions that appear multiple times: {}'.format(np.sum(qids.value_counts() > 1)))
-
-plt.figure(figsize=(12, 5))
-plt.hist(qids.value_counts(), bins=50)
-plt.yscale('log', nonposy='clip')
-plt.title('Log-Histogram of question appearance counts')
-plt.xlabel('Number of occurences of question')
-plt.ylabel('Number of questions')
-plt.savefig('./graph/questions-appearance.jpg')
-plt.show()
-print()
-
-
-
-
-pal = sns.color_palette()
+# print('Total number of question pairs for training: {}'.format(len(df_train)))
+# print('Duplicate pairs: {}%'.format(round(df_train['is_duplicate'].mean()*100, 2)))
+# qids = pd.Series(df_train['qid1'].tolist() + df_train['qid2'].tolist())
+# print('Total number of questions in the training data: {}'.format(len(
+#     np.unique(qids))))
+# print('Number of questions that appear multiple times: {}'.format(np.sum(qids.value_counts() > 1)))
+#
+# plt.figure(figsize=(12, 5))
+# plt.hist(qids.value_counts(), bins=50)
+# plt.yscale('log', nonposy='clip')
+# plt.title('Log-Histogram of question appearance counts')
+# plt.xlabel('Number of occurences of question')
+# plt.ylabel('Number of questions')
+# plt.savefig('./graph/questions-appearance.jpg')
+# plt.show()
+# print()
+#
+#
+#
+#
+# pal = sns.color_palette()
 train_qs = pd.Series(df_train['question1'].tolist() + df_train['question2'].tolist()).astype(str)
-test_qs = pd.Series(df_test['question1'].tolist() + df_test['question2'].tolist()).astype(str)
-
-dist_train = train_qs.apply(len)
-dist_test = test_qs.apply(len)
-plt.figure(figsize=(15, 10))
-plt.hist(dist_train, bins=200, range=[0, 200], color=pal[2], normed=True, label='train')
-plt.hist(dist_test, bins=200, range=[0, 200], color=pal[1], normed=True, alpha=0.5, label='test')
-plt.title('Normalised histogram of character count in questions', fontsize=15)
-plt.legend()
-plt.xlabel('Number of characters', fontsize=15)
-plt.ylabel('Probability', fontsize=15)
-plt.savefig('./graph/character-count.jpg')
-plt.show()
-print('mean-train {:.2f} std-train {:.2f} mean-test {:.2f} std-test {:.2f} max-train {:.2f} max-test {:.2f}'.format(dist_train.mean(), 
-                          dist_train.std(), dist_test.mean(), dist_test.std(), dist_train.max(), dist_test.max()))
-
-
-# In[13]:
-
-
+# # test_qs = pd.Series(df_test['question1'].tolist() + df_test['question2'].tolist()).astype(str)
+#
+# dist_train = train_qs.apply(len)
+# dist_test = test_qs.apply(len)
+# plt.figure(figsize=(15, 10))
+# plt.hist(dist_train, bins=200, range=[0, 200], color=pal[2], normed=True, label='train')
+# plt.hist(dist_test, bins=200, range=[0, 200], color=pal[1], normed=True, alpha=0.5, label='test')
+# plt.title('Normalised histogram of character count in questions', fontsize=15)
+# plt.legend()
+# plt.xlabel('Number of characters', fontsize=15)
+# plt.ylabel('Probability', fontsize=15)
+# plt.savefig('./graph/character-count.jpg')
+# plt.show()
+# print('mean-train {:.2f} std-train {:.2f} mean-test {:.2f} std-test {:.2f} max-train {:.2f} max-test {:.2f}'.format(dist_train.mean(),
+#                           dist_train.std(), dist_test.mean(), dist_test.std(), dist_train.max(), dist_test.max()))
+#
+#
+# # In[13]:
+#
+#
 from nltk.corpus import stopwords
-
+#
 stops = set(stopwords.words("english"))
-
+#
 def word_match_share(row):
     q1words = {}
     q2words = {}
@@ -93,16 +93,16 @@ def word_match_share(row):
     shared_words_in_q2 = [w for w in q2words.keys() if w in q1words]
     R = (len(shared_words_in_q1) + len(shared_words_in_q2))/(len(q1words) + len(q2words))
     return R
-
-plt.figure(figsize=(15, 5))
+#
+# plt.figure(figsize=(15, 5))
 train_word_match = df_train.apply(word_match_share, axis=1, raw=True)
-plt.hist(train_word_match[df_train['is_duplicate'] == 0], bins=20, normed=True, label='Not Duplicate')
-plt.hist(train_word_match[df_train['is_duplicate'] == 1], bins=20, normed=True, alpha=0.7, label='Duplicate')
-plt.legend()
-plt.title('Label distribution over word_match_share', fontsize=15)
-plt.xlabel('word_match_share', fontsize=15)
-plt.savefig('./graph/label-distribution-word-match-share.jpg')
-plt.show()
+# plt.hist(train_word_match[df_train['is_duplicate'] == 0], bins=20, normed=True, label='Not Duplicate')
+# plt.hist(train_word_match[df_train['is_duplicate'] == 1], bins=20, normed=True, alpha=0.7, label='Duplicate')
+# plt.legend()
+# plt.title('Label distribution over word_match_share', fontsize=15)
+# plt.xlabel('word_match_share', fontsize=15)
+# plt.savefig('./graph/label-distribution-word-match-share.jpg')
+# plt.show()
 
 # In[14]:
 
